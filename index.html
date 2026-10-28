@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Galaxy Classifier</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0a0c14; color: white;
+      max-width: 800px; margin: 0 auto; padding: 2rem;
+    }
+    h1 { text-align: center; color: #00e5ff; text-shadow: 0 0 12px #00e5ff88; }
+    h2 { color: #00e5ff; margin-top: 2.5rem; }
+    /* rounded table with hover */
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 1.5rem 0;
+            border: 1px solid #333; border-radius: 12px; overflow: hidden; }
+    th, td { padding: 12px; text-align: center; border-bottom: 1px solid #333; }
+    th { background: #1a1a3e; color: #00e5ff; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #141830; }
+    .highlight { color: #34d399; font-weight: bold; font-size: 1.2em; }
+    /* key finding card */
+    .card { background: #11142a; border-left: 4px solid #00e5ff; padding: 1rem 1.2rem; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>🔭 Galaxy Morphology Classification</h1>
+  <p style="text-align:center; color:#888;">ResNet-50 + LoRA Fine-Tuning | TMI-102 PaAC IIT Roorkee</p>
+  <p style="text-align:center;"><strong>Gurpreet Singh</strong> · Enrollment No. 26323018</p>
+
+  <h2>📊 Results (3 classes: Spiral, Elliptical, Merger)</h2>
+  <table>
+    <tr><th>Model</th><th>Trainable Params</th><th>Test Accuracy</th><th>Macro-F1</th><th>Time/Epoch</th></tr>
+    <tr><td>Frozen Baseline</td><td>525,315</td><td>83.15%</td><td>0.737</td><td>148s</td></tr>
+    <tr><td>Full Fine-Tune</td><td>24,059,907</td><td class="highlight">93.17%</td><td>0.892</td><td>167s</td></tr>
+    <tr><td>LoRA (r=4)</td><td>9,987</td><td>82.14%</td><td>0.716</td><td>152s</td></tr>
+  </table>
+
+  <h2>🔬 Key Finding</h2>
+  <p class="card">Full fine-tuning is the best model at <strong>93.17% accuracy</strong>. LoRA trains only
+  <strong>9,987</strong> parameters (99.96% fewer than full fine-tuning) but reaches 82.14%,
+  mostly because it struggles with the rare <strong>merger</strong> class.</p>
+
+  <footer style="text-align:center; color:#555; margin-top:3rem; padding-top:1rem; border-top:1px solid #333;">
+    TMI-102 · PaAC IIT Roorkee · 2026
+  </footer>
+</body>
+</html>
