@@ -1,0 +1,44 @@
+{
+  "w4_frozen_3class": {
+    "trainable_params": 525315,
+    "total_params": 24113027,
+    "test_acc": 0.8315256834030151,
+    "macro_f1": 0.737086619858402,
+    "recall": {
+      "elliptical": 0.9057377049180327,
+      "merger": 0.4325153374233129,
+      "spiral": 0.8639344262295082
+    },
+    "epochs_run": 15,
+    "sec_per_epoch": 147.80169151624042,
+    "lr": 0.001
+  },
+  "w5_full_3class": {
+    "trainable_params": 24059907,
+    "total_params": 24113027,
+    "test_acc": 0.9316703081130981,
+    "macro_f1": 0.8924300820395885,
+    "recall": {
+      "elliptical": 0.9647540983606557,
+      "merger": 0.8098159509202454,
+      "spiral": 0.9311475409836065
+    },
+    "epochs_run": 15,
+    "sec_per_epoch": 167.28413519859313,
+    "lr": 0.0001
+  },
+  "w6_lora_3class": {
+    "trainable_params": 9987,
+    "total_params": 24122243,
+    "test_acc": 0.8214027285575867,
+    "macro_f1": 0.7162873277705814,
+    "recall": {
+      "elliptical": 0.8696721311475409,
+      "merger": 0.37423312883435583,
+      "spiral": 0.8926229508196721
+    },
+    "epochs_run": 6,
+    "sec_per_epoch": 151.87487077713013,
+    "lr": 0.001
+  }
+}
