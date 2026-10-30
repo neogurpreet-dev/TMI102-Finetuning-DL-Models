@@ -2,7 +2,7 @@
 
 TMI-102 project (PaAC, IIT Roorkee) by Gurpreet Singh. Compares three ways of adapting an ImageNet-pretrained **ResNet-50** to classify galaxies from **Galaxy Zoo** into three classes: **elliptical, merger, spiral**.
 
-**Live web demo:** https://neogurpreet-dev.github.io/tmi102-finetuning-dl-models/
+**Live web demo:** https://neogurpreet-dev.github.io/TMI102-Finetuning-DL-Models/
 
 ## Results (test set, 2,766 images)
 
