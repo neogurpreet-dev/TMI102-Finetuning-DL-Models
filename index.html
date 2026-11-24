@@ -1,226 +1,358 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Galaxy Morphology Classification | Gurpreet Singh</title>
-  <style>
-    :root {
-      --bg: #0a0c14; --panel: #11142a; --line: #2a2f55; --text: #e8eaf3; --muted: #8a8fa3;
-      --cyan: #00e5ff; --green: #34d399; --red: #f87171; --amber: #fbbf24;
-    }
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text);
-           max-width: 820px; margin: 0 auto; padding: 2rem 1.25rem 3rem; line-height: 1.6; }
-
-    /* ---- top ---- */
-    .kicker { font-family: Consolas, "Courier New", monospace; color: var(--muted); font-size: .85rem; letter-spacing: .08em; text-transform: uppercase; }
-    h1 { color: var(--cyan); margin: .3rem 0 .4rem; font-size: 2rem; line-height: 1.2; }
-    .sub { color: var(--muted); margin: 0; }
-    .who { margin: .8rem 0 0; }
-    nav { margin: 1.4rem 0 0; padding: .7rem 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-          display: flex; gap: 1.4rem; flex-wrap: wrap; font-size: .95rem; }
-    nav a { color: var(--cyan); text-decoration: none; }
-    nav a:hover { text-decoration: underline; }
-
-    h2 { color: var(--cyan); margin: 3rem 0 .4rem; font-size: 1.4rem; }
-    .lead { color: var(--muted); margin: 0 0 1.2rem; }
-
-    /* ---- table ---- */
-    table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-    th, td { padding: 12px 8px; text-align: center; border-bottom: 1px solid var(--line); }
-    th { background: #1a1a3e; color: var(--cyan); font-size: .9rem; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #141830; }
-    .best { color: var(--green); font-weight: bold; font-size: 1.15em; }
-    .tablewrap { overflow-x: auto; }
-
-    /* ---- recall bars ---- */
-    .recall { margin-top: 1.8rem; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 1.2rem; }
-    .recall h3 { margin: 0 0 .2rem; font-size: 1.05rem; }
-    .recall p { margin: 0 0 1rem; color: var(--muted); font-size: .92rem; }
-    .cls { margin-bottom: 1rem; }
-    .cls:last-child { margin-bottom: 0; }
-    .cls b { display: block; margin-bottom: .3rem; text-transform: capitalize; }
-    .row { display: grid; grid-template-columns: 110px 1fr 52px; gap: .6rem; align-items: center; font-size: .85rem; margin: .2rem 0; }
-    .track { background: #1b1f3d; border-radius: 6px; height: 14px; overflow: hidden; }
-    .fill { height: 100%; border-radius: 6px; }
-    .num { text-align: right; font-family: Consolas, "Courier New", monospace; }
-    .merger-note { border-left: 3px solid var(--amber); padding-left: .7rem; margin-top: 1rem; color: var(--muted); font-size: .92rem; }
-
-    /* ---- timeline ---- */
-    .timeline { position: relative; margin: 1.5rem 0 0; padding-left: 2.4rem; }
-    .timeline::before { content: ""; position: absolute; left: 11px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
-    .step { position: relative; margin-bottom: 1.6rem; }
-    .step::before { content: ""; position: absolute; left: -2.4rem; top: 5px; width: 14px; height: 14px; border-radius: 50%;
-                    background: var(--bg); border: 3px solid var(--cyan); margin-left: 4px; }
-    .step.pivot::before { border-color: var(--amber); background: var(--amber); }
-    .wk { font-family: Consolas, "Courier New", monospace; color: var(--cyan); font-size: .85rem; letter-spacing: .06em; }
-    .step.pivot .wk { color: var(--amber); }
-    .step h3 { margin: .1rem 0 .3rem; font-size: 1.1rem; }
-    .step p { margin: .2rem 0; color: #c9cde0; }
-    .pivotbox { background: #2a2208; border: 1px solid #fbbf2455; border-radius: 10px; padding: .8rem 1rem; margin-top: .6rem; }
-    .pivotbox p { margin: .25rem 0; }
-
-    /* ---- quotes ---- */
-    .quote { background: var(--panel); border-left: 4px solid var(--cyan); border-radius: 8px; padding: 1rem 1.2rem; margin: 1.2rem 0; }
-    .quote p { margin: 0 0 .6rem; }
-    .quote .src { margin: 0; color: var(--muted); font-size: .85rem; font-family: Consolas, "Courier New", monospace; }
-    .qtitle { margin: 2rem 0 0; font-weight: bold; }
-
-    .finding { background: var(--panel); border-left: 4px solid var(--green); border-radius: 8px; padding: 1rem 1.2rem; }
-
-    footer { text-align: center; color: #555; margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid #333; font-size: .9rem; }
-
-    @media (max-width: 560px) {
-      h1 { font-size: 1.6rem; }
-      .row { grid-template-columns: 90px 1fr 48px; }
-      th, td { padding: 10px 4px; font-size: .85rem; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Galaxy Classifier · TMI-102</title>
+<style>
+:root{--bg:#111214;--glass:rgba(255,255,255,.055);--glass2:rgba(255,255,255,.085);--line:rgba(255,255,255,.10);--ink:#f5f5f7;--mute:#a1a1a6;--dim:#6e6e73;--lime:#c6ff1a;--limeink:#14160a;
+--font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Inter","Segoe UI",system-ui,sans-serif;--mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;line-height:1.45;min-height:100vh;
+background-image:radial-gradient(900px 480px at 78% -8%,rgba(198,255,26,.10),transparent 70%),radial-gradient(700px 420px at 4% 6%,rgba(255,255,255,.05),transparent 70%);background-repeat:no-repeat}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}button:focus-visible,a:focus-visible{outline:2px solid var(--lime);outline-offset:3px}
+.nav{position:sticky;top:0;z-index:10;backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);background:rgba(17,18,20,.72);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1180px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:14px}
+.brand{white-space:nowrap;display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em;font-size:17px}.brand svg{width:26px;height:26px}
+.sub{color:var(--mute);font-size:13.5px}.spacer{flex:1}
+.tabs{display:flex;gap:4px;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tabs a{padding:7px 16px;border-radius:999px;font-size:14px;font-weight:600;color:var(--mute);text-decoration:none;white-space:nowrap}
+.tabs a:hover{color:var(--ink)}.tabs a[aria-current="page"]{background:var(--lime);color:var(--limeink)}
+.pill{font-size:12.5px;color:var(--mute);border:1px solid var(--line);background:var(--glass);border-radius:999px;padding:6px 12px;white-space:nowrap}.pill b{color:var(--ink);font-weight:600}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 24px 56px}
+h1{font-size:clamp(30px,4.6vw,48px);line-height:1.05;letter-spacing:-.03em;margin:6px 0 8px;font-weight:700}h1 span{color:var(--lime)}
+.lead{color:var(--mute);font-size:17px;max-width:64ch;margin:0 0 24px}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:28px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.app{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.kicker{font:12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.viewer{padding:14px}
+.frame{position:relative;aspect-ratio:1/1;border-radius:20px;overflow:hidden;background:#050506;display:grid;place-items:center}
+.frame img{width:100%;height:100%;object-fit:cover;display:none}.frame.has img{display:block}
+.empty{text-align:center;color:var(--mute);padding:24px;max-width:30ch}.empty svg{width:46px;height:46px;opacity:.7;margin-bottom:8px}.frame.has .empty{display:none}
+.frame::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 90px rgba(0,0,0,.45);pointer-events:none}
+.idtag{position:absolute;left:14px;top:14px;z-index:2;font:12px var(--mono);color:#e7e7ea;background:rgba(0,0,0,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px 10px;display:none}.frame.has .idtag{display:block}
+.scan{position:absolute;left:0;right:0;height:3px;top:0;z-index:3;background:linear-gradient(90deg,transparent,var(--lime),transparent);box-shadow:0 0 22px 6px rgba(198,255,26,.45);opacity:0;pointer-events:none}
+.frame.run .scan{opacity:1;animation:sweep 1.6s ease-in-out infinite alternate}
+@keyframes sweep{from{top:2%}to{top:97%}}
+.tools{display:flex;gap:8px;margin:12px 2px 0;flex-wrap:wrap}
+.btn{padding:10px 16px;border-radius:12px;background:var(--glass2);border:1px solid var(--line);font-weight:600;font-size:14.5px;transition:border-color .2s,background .2s}
+.btn:hover{border-color:var(--lime)}.btn.p{background:var(--lime);color:var(--limeink);border-color:var(--lime)}
+.folder{margin:16px 2px 0}.folder h3{font-size:14px;margin:0 0 8px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.folder h3 code{font:12.5px var(--mono);color:var(--lime)}.folder h3 span{color:var(--dim);font-weight:400;font-size:12.5px}
+.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;max-height:236px;overflow:auto;padding:3px}
+.th{position:relative;aspect-ratio:1/1;border-radius:11px;overflow:hidden;border:2px solid transparent;background:#050506;opacity:.66;transition:transform .2s,border-color .2s,opacity .2s}
+.th img{width:100%;height:100%;object-fit:cover;display:block}.th:hover{opacity:1;transform:translateY(-2px)}.th[aria-selected="true"]{border-color:var(--lime);opacity:1}
+.drop{margin-top:10px;border:1.5px dashed rgba(255,255,255,.2);border-radius:14px;padding:12px;text-align:center;color:var(--mute);font-size:13.5px;transition:border-color .2s,background .2s}
+.drop.over{border-color:var(--lime);background:rgba(198,255,26,.07);color:var(--ink)}
+.panel{padding:22px}.panel h2{font-size:21px;letter-spacing:-.02em;margin:0 0 4px}.panel .pd{color:var(--mute);font-size:14px;margin:0 0 16px}
+.load{border:1px solid var(--line);background:rgba(0,0,0,.28);border-radius:14px;padding:11px 14px;margin-bottom:14px;font-size:13.5px;color:var(--mute)}
+.load b{color:var(--ink)}.load .bar{height:5px;border-radius:9px;background:rgba(255,255,255,.08);margin-top:8px;overflow:hidden}.load .bar i{display:block;height:100%;width:0;background:var(--lime);transition:width .25s}
+.load.ok{border-color:rgba(198,255,26,.3)}.load.err{border-color:#ff8a8a;color:#ffb4b4}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.step{display:grid;grid-template-columns:22px 1fr auto;gap:2px 12px;padding:13px 14px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.2);opacity:.55;transition:opacity .3s,border-color .3s,background .3s}
+.step[data-s="run"]{opacity:1;border-color:rgba(198,255,26,.5);background:rgba(198,255,26,.05)}.step[data-s="done"]{opacity:1}
+.dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--dim);margin-top:4px;transition:all .3s}
+.step[data-s="run"] .dot{border-color:var(--lime);animation:pulse 1s ease-in-out infinite}.step[data-s="done"] .dot{background:var(--lime);border-color:var(--lime)}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(198,255,26,.18)}}
+.step b{font-size:15px}.step .d{display:block;color:var(--mute);font-size:13px}.step .t{font:12px var(--mono);color:var(--mute);font-variant-numeric:tabular-nums;align-self:start;margin-top:3px;font-style:normal}
+.extra{grid-column:2/4}.prog{height:6px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:9px}.prog i{display:block;height:100%;width:0;background:var(--lime);border-radius:9px}
+.layer{font:11.5px var(--mono);color:var(--dim);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.maps{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}.maps div{position:relative}.maps canvas{width:100%;aspect-ratio:1/1;border-radius:8px;background:#0b0c0d;display:block}
+.maps span{position:absolute;left:5px;bottom:3px;font:10px var(--mono);color:rgba(255,255,255,.75)}
+#v224{width:64px;height:64px;border-radius:9px;image-rendering:pixelated;background:#0b0c0d;margin-top:8px}
+.results{margin-top:22px}.rh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 2px 12px}.rh h2{font-size:21px;letter-spacing:-.02em;margin:0}.rh p{margin:0;color:var(--mute);font-size:14px}
+.rg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.rc{padding:20px;transition:border-color .3s}.rc.win{border-color:rgba(198,255,26,.45)}
+.rc .top{display:flex;justify-content:space-between;align-items:center;gap:8px}.rc .nm{font-weight:700;font-size:16px}
+.rc .st{font:11.5px var(--mono);color:var(--dim);text-transform:uppercase;letter-spacing:.06em}.rc.done .st{color:var(--lime)}
+.rc .meta{color:var(--dim);font-size:12.5px;margin:2px 0 14px}
+.pred{font-size:30px;letter-spacing:-.03em;font-weight:700;line-height:1.05;min-height:32px}.pred.wait{color:var(--dim);font-size:20px;font-weight:600}
+.conf{color:var(--mute);font-size:14px;margin:2px 0 14px;min-height:20px}.conf b{color:var(--ink)}
+.bars{display:grid;gap:9px}.b{display:grid;grid-template-columns:76px 1fr 46px;align-items:center;gap:10px;font-size:13.5px}
+.b .n{color:var(--mute)}.b .t{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;display:block}.b .f{display:block;height:100%;width:0;border-radius:99px;background:#5a5d63;transition:width .8s cubic-bezier(.2,.8,.2,1),background .3s}
+.b.top .f{background:var(--lime)}.b.top .n{color:var(--ink);font-weight:600}.b .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--mute)}.b.top .v{color:var(--ink);font-weight:600}
+.mark{margin-top:12px;font-size:13.5px;font-weight:600;min-height:20px}.mark.ok{color:var(--lime)}.mark.no{color:#ff9b9b}
+.summary{margin:16px 2px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.chip{font-size:13px;color:var(--mute);border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:rgba(0,0,0,.25)}.chip b{color:var(--ink)}
+.about{margin-top:22px;padding:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.about h3{margin:0 0 6px;font-size:15px}.about p{margin:0;color:var(--mute);font-size:13.5px}
+@media (max-width:980px){.app{grid-template-columns:1fr}.rg{grid-template-columns:1fr}.about{grid-template-columns:1fr}}
+@media (max-width:560px){.nav-in{padding:10px 14px}.wrap{padding:20px 14px 44px}.grid{grid-template-columns:repeat(5,1fr)}.pill{display:none}.sub{display:none}.maps span{font-size:9px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-
-  <div class="kicker">TMI-102 · PaAC · IIT Roorkee</div>
-  <h1>Galaxy Morphology Classification</h1>
-  <p class="sub">Fine-tuning ResNet-50 on Galaxy Zoo images: Spiral, Elliptical or Merger. Frozen baseline vs full fine-tuning vs LoRA.</p>
-  <p class="who"><strong>Gurpreet Singh</strong></p>
-
-  <nav>
-    <a href="#results">Results</a>
-    <a href="#journey">The Journey</a>
-    <a href="#words">In My Words</a>
-    <a href="#finding">Key Finding</a>
-  </nav>
-
-  <!-- ================= RESULTS ================= -->
-  <h2 id="results">Results</h2>
-  <p class="lead">3-class test set. All three models were retrained on the same 3-class dataset.</p>
-
-  <div class="tablewrap">
-  <table>
-    <tr><th>Model</th><th>Trainable Params</th><th>Test Accuracy</th><th>Macro-F1</th><th>Time/Epoch</th><th>Epochs</th></tr>
-    <tr><td>Frozen Baseline</td><td>525,315</td><td>83.15%</td><td>0.737</td><td>148s</td><td>15</td></tr>
-    <tr><td>Full Fine-Tune</td><td>24,059,907</td><td class="best">93.17%</td><td>0.892</td><td>167s</td><td>15</td></tr>
-    <tr><td>LoRA (r=4)</td><td>9,987</td><td>82.14%</td><td>0.716</td><td>152s</td><td>6</td></tr>
-  </table>
-  </div>
-
-  <div class="recall">
-    <h3>How often each galaxy type is found (recall)</h3>
-    <p>Mergers are the rare class, and the one every model finds least often.</p>
-
-    <div class="cls"><b>elliptical</b>
-      <div class="row"><span>Frozen</span><div class="track"><div class="fill" style="width:90.57%;background:var(--red)"></div></div><span class="num">90.6%</span></div>
-      <div class="row"><span>Full Fine-Tune</span><div class="track"><div class="fill" style="width:96.48%;background:var(--green)"></div></div><span class="num">96.5%</span></div>
-      <div class="row"><span>LoRA (r=4)</span><div class="track"><div class="fill" style="width:86.97%;background:var(--cyan)"></div></div><span class="num">87.0%</span></div>
-    </div>
-    <div class="cls"><b>spiral</b>
-      <div class="row"><span>Frozen</span><div class="track"><div class="fill" style="width:86.39%;background:var(--red)"></div></div><span class="num">86.4%</span></div>
-      <div class="row"><span>Full Fine-Tune</span><div class="track"><div class="fill" style="width:93.11%;background:var(--green)"></div></div><span class="num">93.1%</span></div>
-      <div class="row"><span>LoRA (r=4)</span><div class="track"><div class="fill" style="width:89.26%;background:var(--cyan)"></div></div><span class="num">89.3%</span></div>
-    </div>
-    <div class="cls"><b>merger</b>
-      <div class="row"><span>Frozen</span><div class="track"><div class="fill" style="width:43.25%;background:var(--red)"></div></div><span class="num">43.3%</span></div>
-      <div class="row"><span>Full Fine-Tune</span><div class="track"><div class="fill" style="width:80.98%;background:var(--green)"></div></div><span class="num">81.0%</span></div>
-      <div class="row"><span>LoRA (r=4)</span><div class="track"><div class="fill" style="width:37.42%;background:var(--cyan)"></div></div><span class="num">37.4%</span></div>
-    </div>
-  </div>
-
-  <!-- ================= JOURNEY ================= -->
-  <h2 id="journey">The Journey</h2>
-  <p class="lead">Ten weeks, from a small CNN to a LoRA-adapted ResNet-50.</p>
-
-  <div class="timeline">
-
-    <div class="step">
-      <div class="wk">WEEK 01</div>
-      <h3>A custom CNN on CIFAR-10</h3>
-      <p>Started with CIFAR-10 as a stand-in dataset and built a CNN from scratch.</p>
-    </div>
-
-    <div class="step">
-      <div class="wk">WEEK 02</div>
-      <h3>First pretrained ResNet-50, on galaxy images</h3>
-      <p>Moved to a pretrained ResNet-50 (torchvision) and ran it on galaxy images.</p>
-    </div>
-
-    <div class="step">
-      <div class="wk">WEEK 03</div>
-      <h3>Building the galaxy dataset</h3>
-      <p>Built the dataset from Galaxy Zoo. The first version had 2 classes, a choice I made myself.</p>
-    </div>
-
-    <div class="step">
-      <div class="wk">WEEKS 04 · 05 · 06</div>
-      <h3>Frozen, full fine-tuning, LoRA</h3>
-      <p>Switched from PyTorch to the notebooks' TensorFlow/Keras. Trained a frozen ResNet-50 baseline, then full fine-tuning, then LoRA (rank 4) on the 256-unit head layer.</p>
-      <p>Fixed a rescaling issue along the way: I replaced the hardcoded <code>1./255</code> with ResNet-50's <code>preprocess_input</code> and re-ran Weeks 4 and 5.</p>
-    </div>
-
-    <div class="step pivot">
-      <div class="wk">THE PIVOT · 18 OCT</div>
-      <h3>From 2 classes to all 3</h3>
-      <div class="pivotbox">
-        <p>The assignment notebooks assumed 3 classes (Spiral, Elliptical, Merger), but my dataset had 2. I first handled that by changing the output layer to Dense(2).</p>
-        <p>After asking my mentors, I redid it properly with all 3 classes: rebuilt the dataset, retrained the Week 4, 5 and 6 models, and redid Weeks 8 and 9.</p>
-        <p>Elliptical and spiral stayed exactly as before (8,132 images each, split 5,692 / 1,220 / 1,220), and merger was added as a new class. Mergers are about 3&times; rarer, so the loss uses class weights, which makes a mistake on the rare class cost more.</p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="wk">WEEK 07</div>
-      <h3>Grad-CAM: checking what the model looks at</h3>
-      <p>Looked at heatmaps for 6 random images and 2 wrong predictions, to see if the model looks at the galaxy or at shortcuts.</p>
-    </div>
-
-    <div class="step">
-      <div class="wk">WEEK 08</div>
-      <h3>Robustness tests</h3>
-      <p>Tested the retrained 3-class Week 5 model under noise, blur and rotation.</p>
-    </div>
-
-    <div class="step">
-      <div class="wk">WEEK 09</div>
-      <h3>Confusion matrix and ROC</h3>
-      <p>A 3&times;3 confusion matrix and one-vs-rest ROC curves, comparing all three retrained models.</p>
-    </div>
-
-    <div class="step">
-      <div class="wk">WEEK 10</div>
-      <h3>This page</h3>
-      <p>Deployed on GitHub Pages so the results can be opened with a link.</p>
-    </div>
-
-  </div>
-
-  <!-- ================= IN MY WORDS ================= -->
-  <h2 id="words">In My Words</h2>
-  <p class="lead">Taken as written from my assignment notebooks.</p>
-
-  <p class="qtitle">Why a lower learning rate for fine-tuning?</p>
-  <div class="quote">
-    <p>If we train from scratch, then it starts from random weights hence there's nothing to protect in them which can be ruined. But, during fine-tuning from ImageNet's pretrained weights, if we don't keep a lower LR (learning rate), then there is a high chance that a sudden abrupt change might ruin the well trained weights in just one step. The lower LR makes sure that the weights are allowed only to change by a small amount.</p>
-    <p class="src">Week 5</p>
-  </div>
-
-  <p class="qtitle">LoRA, explained with a song</p>
-  <div class="quote">
-    <p>It's like creating a slowed and reverb version of a song where the original song remains untouched, just like we <em>freeze</em> pretrained weights in LoRA and don't touch them. You don't need to recreate the complete song again, you apply a few settings on the original song to change the entire vibe and in LoRA, you add adapter matrices on top of the original weights, which gives our model the ability to detect galaxies, that it didn't have initially.</p>
-    <p class="src">Week 6 (excerpt)</p>
-  </div>
-
-  <p class="qtitle">Why Grad-CAM, if accuracy is already high?</p>
-  <div class="quote">
-    <p>Looking at the high accuracy alone, we cannot confidently say that the model is working properly. It is possible that the model might be using some shortcuts, like looking at the background or some bright stars around the galaxy or other minor details, instead of the galaxy itself. Looking at the heat map, we can check that the model focuses on the galaxy rather than some other shortcuts, and this helps us to debug the model properly whenever needed.</p>
-    <p class="src">Week 7</p>
-  </div>
-
-  <!-- ================= FINDING ================= -->
-  <h2 id="finding">Key Finding</h2>
-  <p class="finding">Full fine-tuning is the best model at <strong>93.17% accuracy</strong>. LoRA trains only <strong>9,987</strong> parameters (99.96% fewer than full fine-tuning) but reaches 82.14%. The gap comes mostly from the rare <strong>merger</strong> class: recall is 37.4% for LoRA against 81.0% for full fine-tuning.</p>
-
-  <footer>TMI-102 · PaAC IIT Roorkee · 2026</footer>
+<header class="nav"><div class="nav-in">
+ <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="#1c1d20" stroke="rgba(255,255,255,.14)"/><path d="M16 16m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0" fill="#c6ff1a"/><path d="M16 14c4-6 11-3 11 2M16 18c-4 6-11 3-11-2" fill="none" stroke="#c6ff1a" stroke-width="1.8" stroke-linecap="round"/></svg>Galaxy Classifier</div>
+ <span class="sub">TMI-102 · Team STC-PaAC-6</span><span class="spacer"></span>
+ <nav class="tabs" aria-label="Pages"><a href="index.html" aria-current="page">Demo</a><a href="journey.html">Journey</a></nav>
+ <span class="pill"><b>Live</b> · runs in your browser</span>
+</div></header>
+<main class="wrap">
+ <div class="kicker">Real models · no saved answers</div>
+ <h1>Pick any galaxy.<br><span>Watch three models decide.</span></h1>
+ <p class="lead">Choose a photo from the folder, or drop in your own. The page runs our three trained ResNet-50 networks right here on your device, layer by layer. Nothing is looked up.</p>
+ <div class="app">
+  <section class="card viewer" aria-label="Galaxy image">
+   <div class="frame" id="frame"><span class="idtag" id="idtag"></span><div class="scan"></div>
+    <img id="img" alt="Selected galaxy">
+    <div class="empty"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="16" cy="16" r="2.4"/><path d="M16 13c4-7 12-3 12 3M16 19c-4 7-12 3-12-3"/></svg><div>Choose a galaxy from the folder below to start.</div></div></div>
+   <div class="tools"><button class="btn p" id="rand">Surprise me</button><button class="btn" id="up">Upload an image</button><input type="file" id="file" accept="image/*" hidden></div>
+   <div class="folder"><h3>Image folder <code>galaxy_images/</code><span id="fcount"></span></h3><div class="grid" id="grid" role="listbox" aria-label="Galaxy images"></div></div>
+   <div class="drop" id="drop">…or drag any galaxy image onto this page</div>
+  </section>
+  <section class="card panel" aria-label="Pipeline">
+   <h2>What happens when you pick one</h2><p class="pd">Every step below is real computation, timed on your device.</p>
+   <div class="load" id="load"><b>Models</b> <span id="loadtxt">starting…</span><div class="bar"><i id="loadbar"></i></div></div>
+   <ol class="steps">
+    <li class="step" id="s1" data-s="idle"><i class="dot"></i><div><b>1 · Read and resize</b><span class="d">Image to 224×224 pixels, then subtract the ImageNet average colour.</span></div><em class="t" id="t1"></em><div class="extra"><canvas id="v224" width="224" height="224"></canvas></div></li>
+    <li class="step" id="s2" data-s="idle"><i class="dot"></i><div><b>2 · ResNet-50, ImageNet weights</b><span class="d">One pass, shared by the Frozen and LoRA models.</span></div><em class="t" id="t2"></em><div class="extra"><div class="prog"><i id="p2"></i></div><div class="layer" id="l2">waiting</div><div class="maps" id="m2"></div></div></li>
+    <li class="step" id="s3" data-s="idle"><i class="dot"></i><div><b>3 · ResNet-50, fine-tuned weights</b><span class="d">The full fine-tuning model has its own changed backbone.</span></div><em class="t" id="t3"></em><div class="extra"><div class="prog"><i id="p3"></i></div><div class="layer" id="l3">waiting</div><div class="maps" id="m3"></div></div></li>
+    <li class="step" id="s4" data-s="idle"><i class="dot"></i><div><b>4 · Classifier heads</b><span class="d">Dense 256 → 3 classes, one head per model.</span></div><em class="t" id="t4"></em></li>
+   </ol>
+  </section>
+ </div>
+ <section class="results" aria-label="Predictions">
+  <div class="rh"><h2>Predictions</h2><p id="rsub">Waiting for an image.</p></div>
+  <div class="rg" id="rg"></div>
+  <div class="summary" id="summary"></div>
+ </section>
+ <section class="card about">
+  <div><h3>Nothing is hardcoded</h3><p>The weights from our three trained models are loaded in your browser and run on whatever image you choose, including ones we have never seen.</p></div>
+  <div><h3>Honest about the images</h3><p>The folder holds 30 random galaxies from the held-out test set (10 per type), not picked to look good. Some predictions will be wrong, mergers most often.</p></div>
+  <div><h3>Compressed for the web</h3><p>Weights are stored as 8-bit numbers to keep the download near 50 MB. On our 30 test images this matched the original models on 89 of 90 predictions.</p></div>
+ </section>
+</main>
+<script id="engine" type="text/plain">/* ResNet-50 inference in plain JS. Weights: int8 per-output-channel (BN folded into conv). */
+function buildModel(blob, convs){
+  const out=[]; let off=0;
+  for(const c of convs){
+    const k=c.k, n=k[0]*k[1]*k[2]*k[3], co=k[3];
+    const q=new Int8Array(blob.buffer, blob.byteOffset+off, n); off+=n;
+    const s=new Float32Array(blob.buffer.slice(blob.byteOffset+off, blob.byteOffset+off+4*co)); off+=4*co;
+    const b=new Float32Array(blob.buffer.slice(blob.byteOffset+off, blob.byteOffset+off+4*co)); off+=4*co;
+    out.push({q,s,b,k});
+  }
+  return out;
+}
+let WF=new Float32Array(0);
+function conv(x,H,W,C,L,stride,same){
+  const kh=L.k[0],kw=L.k[1],co=L.k[3],n=L.q.length;
+  if(WF.length<n) WF=new Float32Array(n);
+  const q=L.q,s=L.s,wf=WF;
+  for(let i=0;i<n;i+=co) for(let o=0;o<co;o++) wf[i+o]=q[i+o]*s[o];
+  let oh,ow,pt=0,pl=0;
+  if(same){oh=Math.ceil(H/stride);ow=Math.ceil(W/stride);const ph=Math.max((oh-1)*stride+kh-H,0),pw=Math.max((ow-1)*stride+kw-W,0);pt=ph>>1;pl=pw>>1;}
+  else{oh=Math.floor((H-kh)/stride)+1;ow=Math.floor((W-kw)/stride)+1;}
+  const out=new Float32Array(oh*ow*co), b=L.b;
+  for(let oy=0;oy<oh;oy++)for(let ox=0;ox<ow;ox++){
+    const ob=(oy*ow+ox)*co;
+    for(let o=0;o<co;o++) out[ob+o]=b[o];
+    for(let ky=0;ky<kh;ky++){const iy=oy*stride+ky-pt; if(iy<0||iy>=H)continue;
+      for(let kx=0;kx<kw;kx++){const ix=ox*stride+kx-pl; if(ix<0||ix>=W)continue;
+        const xb=(iy*W+ix)*C, wb=(ky*kw+kx)*C*co;
+        for(let c=0;c<C;c++){const v=x[xb+c]; if(v===0)continue; const wo=wb+c*co;
+          for(let o=0;o<co;o++) out[ob+o]+=v*wf[wo+o];}
+      }}
+  }
+  return {d:out,h:oh,w:ow,c:co};
+}
+function padT(t,p){const [pt,pb,pl,pr]=p;const H=t.h+pt+pb,W=t.w+pl+pr,C=t.c;const o=new Float32Array(H*W*C);
+  for(let y=0;y<t.h;y++)o.set(t.d.subarray(y*t.w*C,(y+1)*t.w*C),((y+pt)*W+pl)*C);return {d:o,h:H,w:W,c:C};}
+function pool(t,k,s,same){const C=t.c;let oh,ow,pt=0,pl=0;
+  if(same){oh=Math.ceil(t.h/s);ow=Math.ceil(t.w/s);pt=Math.max((oh-1)*s+k-t.h,0)>>1;pl=Math.max((ow-1)*s+k-t.w,0)>>1;}
+  else{oh=Math.floor((t.h-k)/s)+1;ow=Math.floor((t.w-k)/s)+1;}
+  const o=new Float32Array(oh*ow*C).fill(-Infinity);
+  for(let y=0;y<oh;y++)for(let x=0;x<ow;x++){const ob=(y*ow+x)*C;
+    for(let ky=0;ky<k;ky++){const iy=y*s+ky-pt;if(iy<0||iy>=t.h)continue;
+      for(let kx=0;kx<k;kx++){const ix=x*s+kx-pl;if(ix<0||ix>=t.w)continue;const xb=(iy*t.w+ix)*C;
+        for(let c=0;c<C;c++){const v=t.d[xb+c];if(v>o[ob+c])o[ob+c]=v;}}}}
+  return {d:o,h:oh,w:ow,c:C};}
+const STAGE_END={pool1_pool:1,conv2_block3_out:2,conv3_block4_out:3,conv4_block6_out:4,conv5_block3_out:5};
+function stageOf(name){const m=/^conv(\d)_/.exec(name);if(m)return +m[1];return 1;}
+function heat(t){const n=t.h*t.w,C=t.c,m=new Float32Array(n);let lo=Infinity,hi=-Infinity;
+  for(let i=0;i<n;i++){let s=0;for(let c=0;c<C;c++)s+=t.d[i*C+c];m[i]=s/C;if(m[i]<lo)lo=m[i];if(m[i]>hi)hi=m[i];}
+  const u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=Math.round(255*(m[i]-lo)/((hi-lo)||1));return {u,h:t.h,w:t.w};}
+function runBackbone(graph,layers,input,onp){
+  const ops=graph.ops,N=ops.length;const last={};
+  ops.forEach((o,i)=>{last[o.in_]=i;if(o.in2)last[o.in2]=i;});last[graph.output]=1e9;
+  const T={};T[graph.input]={d:input,h:224,w:224,c:3};
+  for(let i=0;i<N;i++){const o=ops[i];const a=T[o.in_];let r;
+    if(o.op==='conv')r=conv(a.d,a.h,a.w,a.c,layers[o.w],o.s,o.same);
+    else if(o.op==='pad')r=padT(a,o.p);
+    else if(o.op==='relu'){const d=new Float32Array(a.d.length);for(let j=0;j<d.length;j++){const v=a.d[j];d[j]=v>0?v:0;}r={d,h:a.h,w:a.w,c:a.c};}
+    else if(o.op==='pool')r=pool(a,o.k,o.s,o.same);
+    else if(o.op==='add'){const b=T[o.in2],d=new Float32Array(a.d.length);for(let j=0;j<d.length;j++)d[j]=a.d[j]+b.d[j];r={d,h:a.h,w:a.w,c:a.c};}
+    T[o.out]=r;
+    for(const nm of [o.in_,o.in2]) if(nm&&last[nm]===i) delete T[nm];
+    const ev=STAGE_END[o.out];
+    onp&&onp({i:i+1,n:N,name:o.out,stage:stageOf(o.out),heat:ev?heat(r):null,stageEnd:ev||0});
+  }
+  const t=T[graph.output],C=t.c,n=t.h*t.w,f=new Float32Array(C);
+  for(let i=0;i<n;i++)for(let c=0;c<C;c++)f[c]+=t.d[i*C+c];
+  for(let c=0;c<C;c++)f[c]/=n;return f;
+}
+</script>
+<script id="wglue" type="text/plain">
+let G=null,LAYERS=null;
+onmessage=async e=>{const m=e.data;
+ if(m.type==='load'){try{
+  const man=await (await fetch(m.base+'model.json')).json();G=man.graph;const B=man.backbones[m.which];const parts=[];let got=0;
+  for(const f of B.files){const r=await fetch(m.base+f);if(!r.ok)throw new Error(f+' '+r.status);const rd=r.body.getReader();
+   for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;postMessage({type:'dl',got});}}
+  const blob=new Uint8Array(got);let o=0;for(const p of parts){blob.set(p,o);o+=p.length;}
+  LAYERS=buildModel(blob,B.convs);postMessage({type:'ready'});
+ }catch(err){postMessage({type:'error',msg:String(err)});}}
+ else if(m.type==='run'){const t0=performance.now();
+  const f=runBackbone(G,LAYERS,m.x,p=>{const tr=p.heat?[p.heat.u.buffer]:[];postMessage({type:'p',i:p.i,n:p.n,name:p.name,stage:p.stage,stageEnd:p.stageEnd,heat:p.heat},tr);});
+  postMessage({type:'done',f,ms:performance.now()-t0},[f.buffer]);}
+};
+</script>
+<script>
+(function(){
+'use strict';
+const CLS=['elliptical','merger','spiral'],NAME={elliptical:'Elliptical',merger:'Merger',spiral:'Spiral'};
+const MODELS=[{k:'full',nm:'Full fine-tuning',bb:'full',meta:'24.1M trainable weights'},{k:'frozen',nm:'Frozen',bb:'imagenet',meta:'525K trainable weights'},{k:'lora',nm:'LoRA',bb:'imagenet',meta:'9,987 trainable weights'}];
+const $=id=>document.getElementById(id);
+const BASE=new URL('models/',location.href).href;
+let man=null,heads=null,items=[],cur=null,busy=false,pending=null,lastResult=null,cum=null,t0=0,tmr=null,run=null;
+const W={},ready={imagenet:false,full:false},dl={imagenet:0,full:0};let loadErr=null;
+const rg=$('rg');
+MODELS.forEach(m=>{const d=document.createElement('article');d.className='card rc';d.id='rc_'+m.k;
+ d.innerHTML='<div class="top"><span class="nm">'+m.nm+'</span><span class="st" id="st_'+m.k+'">idle</span></div><div class="meta">'+m.meta+' · test accuracy <span id="ta_'+m.k+'"></span></div><div class="pred wait" id="pr_'+m.k+'">—</div><div class="conf" id="cf_'+m.k+'"></div><div class="bars">'+CLS.map(c=>'<div class="b" data-c="'+c+'"><span class="n">'+NAME[c]+'</span><span class="t"><span class="f"></span></span><span class="v">–</span></div>').join('')+'</div><div class="mark" id="mk_'+m.k+'"></div>';
+ rg.appendChild(d);});
+['m2','m3'].forEach(id=>{const el=$(id);for(let s=1;s<=5;s++){const d=document.createElement('div');d.innerHTML='<canvas id="'+id+'_'+s+'" width="7" height="7"></canvas><span>conv'+s+'</span>';el.appendChild(d);}});
+function resetResults(){
+ MODELS.forEach(m=>{$('rc_'+m.k).className='card rc';$('st_'+m.k).textContent='idle';$('pr_'+m.k).textContent='—';$('pr_'+m.k).className='pred wait';$('cf_'+m.k).innerHTML='';$('mk_'+m.k).textContent='';$('mk_'+m.k).className='mark';
+  document.querySelectorAll('#rc_'+m.k+' .b').forEach(b=>{b.classList.remove('top');b.querySelector('.f').style.width='0%';b.querySelector('.v').textContent='–';});});
+ $('summary').innerHTML='';
+ ['m2','m3'].forEach(id=>{for(let s=1;s<=5;s++){const c=$(id+'_'+s);c.getContext('2d').clearRect(0,0,c.width,c.height);}});
+ [['p2','l2'],['p3','l3']].forEach(a=>{$(a[0]).style.width='0%';$(a[1]).textContent='waiting';});
+ ['t1','t2','t3','t4'].forEach(i=>$(i).textContent='');[1,2,3,4].forEach(i=>$('s'+i).dataset.s='idle');
+}
+function setStep(i,s,t){$('s'+i).dataset.s=s;if(t!=null)$('t'+i).textContent=t;}
+const ms=v=>(v/1000).toFixed(2)+' s';
+function updateLoad(){
+ if(loadErr){$('load').className='load err';$('loadtxt').textContent=loadErr;return;}
+ const tot=man?man.backbones.imagenet.bytes+man.backbones.full.bytes:0,got=dl.imagenet+dl.full;
+ if(ready.imagenet&&ready.full&&heads){$('load').className='load ok';$('loadtxt').innerHTML='ready · <b>3 models</b> loaded in your browser';$('loadbar').style.width='100%';return;}
+ if(tot){$('loadtxt').innerHTML='downloading weights · <b>'+(got/1e6).toFixed(1)+' / '+(tot/1e6).toFixed(1)+' MB</b> (cached after the first visit)';$('loadbar').style.width=Math.min(99,got/tot*100)+'%';}
+}
+function mkWorker(which){
+ const src=$('engine').textContent+'\n'+$('wglue').textContent;
+ const w=new Worker(URL.createObjectURL(new Blob([src],{type:'text/javascript'})));
+ w.onerror=e=>{loadErr='Could not start the model worker: '+(e.message||'error');updateLoad();};
+ W[which]=w;
+ w.onmessage=e=>{const m=e.data;
+  if(m.type==='dl'){dl[which]=m.got;updateLoad();}
+  else if(m.type==='ready'){ready[which]=true;updateLoad();maybeStart();}
+  else if(m.type==='error'){loadErr='Failed to load models: '+m.msg;updateLoad();}
+  else onRunMsg(which,m);};
+ w.postMessage({type:'load',base:BASE,which});
+}
+function itemFor(i){const it=items[i];return {url:'galaxy_images/'+it.file,label:it.label,id:it.file.replace('.jpg',''),idx:i};}
+async function init(){
+ if(location.protocol==='file:'){loadErr='Browsers block model files on file:// pages. Open this through a web server, for example GitHub Pages.';updateLoad();}
+ try{
+  items=await (await fetch('galaxy_images/manifest.json')).json();
+  $('fcount').textContent=items.length+' test galaxies';
+  items.forEach((it,i)=>{const b=document.createElement('button');b.className='th';b.setAttribute('role','option');b.setAttribute('aria-selected','false');b.setAttribute('aria-label','Galaxy '+(i+1));
+   b.innerHTML='<img loading="lazy" alt="" src="galaxy_images/'+it.file+'">';b.onclick=()=>choose(itemFor(i));$('grid').appendChild(b);});
+ }catch(e){$('fcount').textContent='(image folder not found)';}
+ if(loadErr)return;
+ try{
+  man=await (await fetch(BASE+'model.json')).json();
+  MODELS.forEach(m=>$('ta_'+m.k).textContent=man.test_acc[m.k].toFixed(1)+'%');
+  const hp=await Promise.all(man.heads_files.map(f=>fetch(BASE+f).then(r=>r.arrayBuffer())));const hb=new Uint8Array(hp.reduce((a,b)=>a+b.byteLength,0));let ho=0;for(const b of hp){hb.set(new Uint8Array(b),ho);ho+=b.byteLength;}heads=new Float32Array(hb.buffer);updateLoad();
+  mkWorker('imagenet');mkWorker('full');
+ }catch(e){loadErr='Failed to load models: '+e;updateLoad();}
+}
+function loadImg(url){return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('image failed to load'));im.src=url;});}
+async function toTensor(url){
+ const im=await loadImg(url),w=im.naturalWidth,h=im.naturalHeight;
+ const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#000';x.fillRect(0,0,w,h);x.drawImage(im,0,0);
+ const d=x.getImageData(0,0,w,h).data,out=new Float32Array(224*224*3),vx=$('v224').getContext('2d'),vi=vx.createImageData(224,224);
+ for(let y=0;y<224;y++){const sy=Math.min(h-1,Math.floor((y+.5)*h/224));
+  for(let xx=0;xx<224;xx++){const sx=Math.min(w-1,Math.floor((xx+.5)*w/224)),p=(sy*w+sx)*4,o=(y*224+xx)*3,q=(y*224+xx)*4;
+   const r=d[p],g=d[p+1],b=d[p+2];out[o]=b-103.939;out[o+1]=g-116.779;out[o+2]=r-123.68;vi.data[q]=r;vi.data[q+1]=g;vi.data[q+2]=b;vi.data[q+3]=255;}}
+ vx.putImageData(vi,0,0);return out;
+}
+function buildCum(){
+ const sh={};sh[man.graph.input]=[224,224,3];const cv=[];let tot=0;
+ for(const o of man.graph.ops){const a=sh[o.in_];let r=a;
+  if(o.op==='pad')r=[a[0]+o.p[0]+o.p[1],a[1]+o.p[2]+o.p[3],a[2]];
+  else if(o.op==='conv'){const kh=o.k[0],kw=o.k[1],co=o.k[3];let oh,ow;if(o.same){oh=Math.ceil(a[0]/o.s);ow=Math.ceil(a[1]/o.s);}else{oh=Math.floor((a[0]-kh)/o.s)+1;ow=Math.floor((a[1]-kw)/o.s)+1;}r=[oh,ow,co];tot+=oh*ow*kh*kw*o.k[2]*co;}
+  else if(o.op==='pool'){r=[Math.floor((a[0]-o.k)/o.s)+1,Math.floor((a[1]-o.k)/o.s)+1,a[2]];}
+  sh[o.out]=r;cv.push(tot);}
+ cum=cv.map(v=>v/tot);
+}
+function onRunMsg(which,m){
+ if(!run)return;const idx=which==='imagenet'?2:3;
+ if(m.type==='p'){
+  $('p'+idx).style.width=(cum[m.i-1]*100).toFixed(1)+'%';$('l'+idx).textContent='layer '+m.i+' / '+m.n+' · '+m.name;
+  if(m.heat){const c=$('m'+idx+'_'+m.stage);c.width=m.heat.w;c.height=m.heat.h;const x=c.getContext('2d'),im=x.createImageData(m.heat.w,m.heat.h),u=m.heat.u;
+   for(let i=0;i<u.length;i++){const v=u[i]/255;im.data[i*4]=Math.round(20+178*v);im.data[i*4+1]=Math.round(22+233*v);im.data[i*4+2]=Math.round(24+2*v);im.data[i*4+3]=255;}x.putImageData(im,0,0);}
+ }else if(m.type==='done'){
+  run.feat[which]=m.f;$('p'+idx).style.width='100%';$('l'+idx).textContent='done';setStep(idx,'done',ms(m.ms));
+  MODELS.filter(x=>x.bb===which).forEach(x=>finishModel(x,m.f));
+  if(run.feat.imagenet&&run.feat.full)finishAll();
+ }
+}
+function head(f,h){let v=f;for(const L of h){const o=new Float32Array(L.o),base=L.off/4,bo=base+L.i*L.o;
+  for(let j=0;j<L.o;j++)o[j]=heads[bo+j];
+  for(let i=0;i<L.i;i++){const vi=v[i];if(vi===0)continue;const r=base+i*L.o;for(let j=0;j<L.o;j++)o[j]+=vi*heads[r+j];}
+  if(L.act==='relu'){for(let j=0;j<L.o;j++)if(o[j]<0)o[j]=0;}else{let m=-Infinity;for(let j=0;j<L.o;j++)if(o[j]>m)m=o[j];let z=0;for(let j=0;j<L.o;j++){o[j]=Math.exp(o[j]-m);z+=o[j];}for(let j=0;j<L.o;j++)o[j]/=z;}v=o;}
+ return Array.from(v);}
+function finishModel(m,feat){
+ if(!run.t4){run.t4=performance.now();setStep(4,'run');}
+ const p=head(feat,man.heads[m.k]);run.probs[m.k]=p;
+ const top=p.indexOf(Math.max(...p));$('rc_'+m.k).className='card rc done';$('st_'+m.k).textContent='done';
+ const pr=$('pr_'+m.k);pr.className='pred';pr.textContent=NAME[CLS[top]];
+ $('cf_'+m.k).innerHTML='<b>'+(p[top]*100).toFixed(1)+'%</b> confident';
+ document.querySelectorAll('#rc_'+m.k+' .b').forEach(b=>{const i=CLS.indexOf(b.dataset.c);b.classList.toggle('top',i===top);b.querySelector('.f').style.width=(p[i]*100).toFixed(1)+'%';b.querySelector('.v').textContent=(p[i]*100).toFixed(1)+'%';});
+}
+function finishAll(){
+ clearInterval(tmr);const total=performance.now()-t0;setStep(4,'done',ms(performance.now()-run.t4));$('frame').classList.remove('run');
+ const tops=MODELS.map(m=>CLS[run.probs[m.k].indexOf(Math.max(...run.probs[m.k]))]),same=tops.every(t=>t===tops[0]);
+ const win=MODELS.reduce((a,b)=>Math.max(...run.probs[a.k])>=Math.max(...run.probs[b.k])?a:b);
+ $('rc_'+win.k).classList.add('win');$('rsub').textContent='Finished in '+ms(total)+' on your device.';
+ let h='<span class="chip"><b>'+(same?'All three agree':'The models disagree')+'</b>'+(same?' · '+NAME[tops[0]]:'')+'</span>';
+ h+=(cur&&cur.label)?'<button class="btn" id="reveal">Reveal dataset label</button>':'<span class="chip">Uploaded image · no dataset label</span>';
+ $('summary').innerHTML=h;lastResult={id:cur&&cur.id,probs:run.probs,ms:total};window.__last=lastResult;
+ if(cur&&cur.label)$('reveal').onclick=reveal;
+ busy=false;run=null;if(pending){const p=pending;pending=null;choose(p);}
+}
+function reveal(){
+ if(!cur||!cur.label||!lastResult)return;let n=0;
+ MODELS.forEach(m=>{const p=lastResult.probs[m.k],t=CLS[p.indexOf(Math.max(...p))],ok=t===cur.label;n+=ok;const mk=$('mk_'+m.k);mk.className='mark '+(ok?'ok':'no');mk.textContent=ok?'✓ Correct':'✗ Wrong · dataset says '+NAME[cur.label];});
+ $('summary').innerHTML='<span class="chip">Dataset label: <b>'+NAME[cur.label]+'</b></span><span class="chip"><b>'+n+' of 3</b> models correct</span>';
+}
+async function choose(it){
+ if(busy){pending=it;$('rsub').textContent='Will run next, after the current image finishes.';return;}
+ if(loadErr)return;
+ cur=it;document.querySelectorAll('.th').forEach((b,i)=>b.setAttribute('aria-selected',String(it.idx===i)));
+ const fr=$('frame');$('img').src=it.url;fr.classList.add('has');$('idtag').textContent=it.id?('Galaxy ID '+it.id):'Your image';
+ resetResults();
+ if(!(ready.imagenet&&ready.full&&heads)){$('rsub').textContent='Models are still downloading. This starts as soon as they are ready.';pending=it;return;}
+ busy=true;fr.classList.add('run');if(!cum)buildCum();
+ MODELS.forEach(m=>$('st_'+m.k).textContent='waiting');
+ t0=performance.now();run={feat:{},probs:{}};
+ tmr=setInterval(()=>{$('rsub').textContent='Running… '+ms(performance.now()-t0);},100);
+ try{
+  setStep(1,'run');const t1=performance.now();const x=await toTensor(it.url);setStep(1,'done',ms(performance.now()-t1));
+  setStep(2,'run');setStep(3,'run');MODELS.forEach(m=>$('st_'+m.k).textContent='running');
+  W.imagenet.postMessage({type:'run',x:x.slice()});W.full.postMessage({type:'run',x});
+ }catch(e){clearInterval(tmr);busy=false;run=null;fr.classList.remove('run');$('rsub').textContent='Could not read that image.';}
+}
+function maybeStart(){if(ready.imagenet&&ready.full&&heads&&pending&&!busy){const p=pending;pending=null;choose(p);}}
+$('rand').onclick=()=>{if(items.length)choose(itemFor(Math.floor(Math.random()*items.length)));};
+$('up').onclick=()=>$('file').click();
+function fromFile(f){if(!f||!/^image\//.test(f.type))return;choose({url:URL.createObjectURL(f),label:null,id:null,idx:-1});}
+$('file').onchange=e=>fromFile(e.target.files[0]);
+const dz=$('drop');['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over');}));
+document.addEventListener('drop',e=>fromFile(e.dataTransfer.files[0]));
+window.__choose=i=>choose(itemFor(i));
+init();
+})();
+</script>
 </body>
 </html>
