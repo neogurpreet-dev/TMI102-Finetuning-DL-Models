@@ -73,8 +73,14 @@ h1{font-size:clamp(30px,4.6vw,48px);line-height:1.05;letter-spacing:-.03em;margi
 .b.top .f{background:var(--lime)}.b.top .n{color:var(--ink);font-weight:600}.b .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--mute)}.b.top .v{color:var(--ink);font-weight:600}
 .mark{margin-top:12px;font-size:13.5px;font-weight:600;min-height:20px}.mark.ok{color:var(--lime)}.mark.no{color:#ff9b9b}
 .summary{margin:16px 2px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.chip{font-size:13px;color:var(--mute);border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:rgba(0,0,0,.25)}.chip b{color:var(--ink)}
-.about{margin-top:22px;padding:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.about h3{margin:0 0 6px;font-size:15px}.about p{margin:0;color:var(--mute);font-size:13.5px}
-@media (max-width:980px){.app{grid-template-columns:1fr}.rg{grid-template-columns:1fr}.about{grid-template-columns:1fr}}
+.about{margin-top:22px;padding:22px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px}.about h3{margin:0 0 6px;font-size:15px}.about p{margin:0;color:var(--mute);font-size:13.5px}
+.cam{margin-top:16px;display:none}.rc.done .cam{display:block}
+.cam .ch{font-size:13.5px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}.cam .ch span{font:11.5px var(--mono);color:var(--dim);font-weight:400}
+.cam canvas{width:100%;aspect-ratio:1/1;border-radius:16px;background:#050506;display:block}
+.cam .cc{color:var(--mute);font-size:13px;margin-top:8px;min-height:36px}.cam .cc b{color:var(--ink)}
+.b{cursor:pointer}.b:hover .n{color:var(--ink)}.b.sel .n::after{content:" ◂";color:var(--lime)}
+@media (max-width:980px){.app{grid-template-columns:1fr}.rg{grid-template-columns:1fr}.about{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.about{grid-template-columns:1fr}}
 @media (max-width:560px){.nav-in{padding:10px 14px}.wrap{padding:20px 14px 44px}.grid{grid-template-columns:repeat(5,1fr)}.pill{display:none}.sub{display:none}.maps span{font-size:9px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -118,6 +124,7 @@ h1{font-size:clamp(30px,4.6vw,48px);line-height:1.05;letter-spacing:-.03em;margi
  <section class="card about">
   <div><h3>Nothing is hardcoded</h3><p>The weights from our three trained models are loaded in your browser and run on whatever image you choose, including ones we have never seen.</p></div>
   <div><h3>Honest about the images</h3><p>The folder holds 30 random galaxies from the held-out test set (10 per type), not picked to look good. Some predictions will be wrong, mergers most often.</p></div>
+  <div><h3>What the heat map means</h3><p>Grad-CAM shows where the network's last layer found evidence for a class. Bright patches pushed the score up. It is coarse (7×7) and shows what the model used, not proof it reasoned correctly. Click any class bar to see the evidence for that class.</p></div>
   <div><h3>Compressed for the web</h3><p>Weights are stored as 8-bit numbers to keep the download near 50 MB. On our 30 test images this matched the original models on 89 of 90 predictions.</p></div>
  </section>
 </main>
@@ -188,7 +195,7 @@ function runBackbone(graph,layers,input,onp){
   }
   const t=T[graph.output],C=t.c,n=t.h*t.w,f=new Float32Array(C);
   for(let i=0;i<n;i++)for(let c=0;c<C;c++)f[c]+=t.d[i*C+c];
-  for(let c=0;c<C;c++)f[c]/=n;return f;
+  for(let c=0;c<C;c++)f[c]/=n;return {f:f,map:t.d};
 }
 </script>
 <script id="wglue" type="text/plain">
@@ -203,7 +210,7 @@ onmessage=async e=>{const m=e.data;
  }catch(err){postMessage({type:'error',msg:String(err)});}}
  else if(m.type==='run'){const t0=performance.now();
   const f=runBackbone(G,LAYERS,m.x,p=>{const tr=p.heat?[p.heat.u.buffer]:[];postMessage({type:'p',i:p.i,n:p.n,name:p.name,stage:p.stage,stageEnd:p.stageEnd,heat:p.heat},tr);});
-  postMessage({type:'done',f,ms:performance.now()-t0},[f.buffer]);}
+  postMessage({type:'done',f:f.f,map:f.map,ms:performance.now()-t0},[f.f.buffer,f.map.buffer]);}
 };
 </script>
 <script>
@@ -213,17 +220,17 @@ const CLS=['elliptical','merger','spiral'],NAME={elliptical:'Elliptical',merger:
 const MODELS=[{k:'full',nm:'Full fine-tuning',bb:'full',meta:'24.1M trainable weights'},{k:'frozen',nm:'Frozen',bb:'imagenet',meta:'525K trainable weights'},{k:'lora',nm:'LoRA',bb:'imagenet',meta:'9,987 trainable weights'}];
 const $=id=>document.getElementById(id);
 const BASE=new URL('models/',location.href).href;
-let man=null,heads=null,items=[],cur=null,busy=false,pending=null,lastResult=null,cum=null,t0=0,tmr=null,run=null;
+let camState={},man=null,heads=null,items=[],cur=null,busy=false,pending=null,lastResult=null,cum=null,t0=0,tmr=null,run=null;
 const W={},ready={imagenet:false,full:false},dl={imagenet:0,full:0};let loadErr=null;
 const rg=$('rg');
 MODELS.forEach(m=>{const d=document.createElement('article');d.className='card rc';d.id='rc_'+m.k;
- d.innerHTML='<div class="top"><span class="nm">'+m.nm+'</span><span class="st" id="st_'+m.k+'">idle</span></div><div class="meta">'+m.meta+' · test accuracy <span id="ta_'+m.k+'"></span></div><div class="pred wait" id="pr_'+m.k+'">—</div><div class="conf" id="cf_'+m.k+'"></div><div class="bars">'+CLS.map(c=>'<div class="b" data-c="'+c+'"><span class="n">'+NAME[c]+'</span><span class="t"><span class="f"></span></span><span class="v">–</span></div>').join('')+'</div><div class="mark" id="mk_'+m.k+'"></div>';
+ d.innerHTML='<div class="top"><span class="nm">'+m.nm+'</span><span class="st" id="st_'+m.k+'">idle</span></div><div class="meta">'+m.meta+' · test accuracy <span id="ta_'+m.k+'"></span></div><div class="pred wait" id="pr_'+m.k+'">—</div><div class="conf" id="cf_'+m.k+'"></div><div class="bars">'+CLS.map(c=>'<div class="b" data-c="'+c+'"><span class="n">'+NAME[c]+'</span><span class="t"><span class="f"></span></span><span class="v">–</span></div>').join('')+'</div><div class="cam" id="cam_'+m.k+'"><div class="ch">What pushed it<span>Grad-CAM</span></div><canvas id="cv_'+m.k+'" width="224" height="224"></canvas><div class="cc" id="cc_'+m.k+'"></div></div><div class="mark" id="mk_'+m.k+'"></div>';
  rg.appendChild(d);});
 ['m2','m3'].forEach(id=>{const el=$(id);for(let s=1;s<=5;s++){const d=document.createElement('div');d.innerHTML='<canvas id="'+id+'_'+s+'" width="7" height="7"></canvas><span>conv'+s+'</span>';el.appendChild(d);}});
 function resetResults(){
  MODELS.forEach(m=>{$('rc_'+m.k).className='card rc';$('st_'+m.k).textContent='idle';$('pr_'+m.k).textContent='—';$('pr_'+m.k).className='pred wait';$('cf_'+m.k).innerHTML='';$('mk_'+m.k).textContent='';$('mk_'+m.k).className='mark';
   document.querySelectorAll('#rc_'+m.k+' .b').forEach(b=>{b.classList.remove('top');b.querySelector('.f').style.width='0%';b.querySelector('.v').textContent='–';});});
- $('summary').innerHTML='';
+ $('summary').innerHTML='';camState={};
  ['m2','m3'].forEach(id=>{for(let s=1;s<=5;s++){const c=$(id+'_'+s);c.getContext('2d').clearRect(0,0,c.width,c.height);}});
  [['p2','l2'],['p3','l3']].forEach(a=>{$(a[0]).style.width='0%';$(a[1]).textContent='waiting';});
  ['t1','t2','t3','t4'].forEach(i=>$(i).textContent='');[1,2,3,4].forEach(i=>$('s'+i).dataset.s='idle');
@@ -291,7 +298,7 @@ function onRunMsg(which,m){
   if(m.heat){const c=$('m'+idx+'_'+m.stage);c.width=m.heat.w;c.height=m.heat.h;const x=c.getContext('2d'),im=x.createImageData(m.heat.w,m.heat.h),u=m.heat.u;
    for(let i=0;i<u.length;i++){const v=u[i]/255;im.data[i*4]=Math.round(20+178*v);im.data[i*4+1]=Math.round(22+233*v);im.data[i*4+2]=Math.round(24+2*v);im.data[i*4+3]=255;}x.putImageData(im,0,0);}
  }else if(m.type==='done'){
-  run.feat[which]=m.f;$('p'+idx).style.width='100%';$('l'+idx).textContent='done';setStep(idx,'done',ms(m.ms));
+  run.feat[which]=m.f;run.fm=run.fm||{};run.fm[which]=m.map;$('p'+idx).style.width='100%';$('l'+idx).textContent='done';setStep(idx,'done',ms(m.ms));
   MODELS.filter(x=>x.bb===which).forEach(x=>finishModel(x,m.f));
   if(run.feat.imagenet&&run.feat.full)finishAll();
  }
@@ -307,7 +314,24 @@ function finishModel(m,feat){
  const top=p.indexOf(Math.max(...p));$('rc_'+m.k).className='card rc done';$('st_'+m.k).textContent='done';
  const pr=$('pr_'+m.k);pr.className='pred';pr.textContent=NAME[CLS[top]];
  $('cf_'+m.k).innerHTML='<b>'+(p[top]*100).toFixed(1)+'%</b> confident';
- document.querySelectorAll('#rc_'+m.k+' .b').forEach(b=>{const i=CLS.indexOf(b.dataset.c);b.classList.toggle('top',i===top);b.querySelector('.f').style.width=(p[i]*100).toFixed(1)+'%';b.querySelector('.v').textContent=(p[i]*100).toFixed(1)+'%';});
+ document.querySelectorAll('#rc_'+m.k+' .b').forEach(b=>{const i=CLS.indexOf(b.dataset.c);b.classList.toggle('top',i===top);b.querySelector('.f').style.width=(p[i]*100).toFixed(1)+'%';b.querySelector('.v').textContent=(p[i]*100).toFixed(1)+'%';b.onclick=()=>drawCam(m.k,i);b.title='Show the evidence for '+NAME[CLS[i]];});
+ const L1=man.heads[m.k][0],base1=L1.off/4,mask=new Uint8Array(L1.o);
+ for(let j=0;j<L1.o;j++){let s=heads[base1+L1.i*L1.o+j];for(let i=0;i<L1.i;i++)s+=feat[i]*heads[base1+i*L1.o+j];mask[j]=s>0?1:0;}
+ camState[m.k]={fm:run.fm[m.bb],mask:mask,top:top};drawCam(m.k,top);
+}
+function drawCam(k,c){
+ const S=camState[k];if(!S)return;const L1=man.heads[k][0],L2=man.heads[k][1],b1=L1.off/4,b2=L2.off/4,D=L1.i;
+ const al=new Float32Array(D);
+ for(let j=0;j<L1.o;j++){if(!S.mask[j])continue;const w2=heads[b2+j*L2.o+c];if(w2===0)continue;for(let i=0;i<D;i++)al[i]+=heads[b1+i*L1.o+j]*w2;}
+ const N=49,cam=new Float32Array(N);let mx=0;
+ for(let p=0;p<N;p++){let s=0;const bb=p*D;for(let i=0;i<D;i++)s+=al[i]*S.fm[bb+i];if(s<0)s=0;cam[p]=s;if(s>mx)mx=s;}
+ const sm=document.createElement('canvas');sm.width=7;sm.height=7;const sx=sm.getContext('2d'),im=sx.createImageData(7,7);
+ for(let p=0;p<N;p++){const v=mx>0?cam[p]/mx:0,w=Math.max(0,(v-.55)/.45);im.data[p*4]=Math.round(198+57*w);im.data[p*4+1]=255;im.data[p*4+2]=Math.round(26+229*w);im.data[p*4+3]=v<.06?0:Math.round(255*(.18+.72*v));}
+ sx.putImageData(im,0,0);
+ const cv=$('cv_'+k),x=cv.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.clearRect(0,0,224,224);x.drawImage($('v224'),0,0,224,224);x.drawImage(sm,0,0,224,224);
+ document.querySelectorAll('#rc_'+k+' .b').forEach(b=>b.classList.toggle('sel',CLS.indexOf(b.dataset.c)===c));
+ $('cc_'+k).innerHTML=mx>0?('Bright areas pushed the score toward <b>'+NAME[CLS[c]]+'</b>'+(c===S.top?'':' (not the prediction)')+'.'):'<b>No positive evidence</b> for '+NAME[CLS[c]]+' anywhere in the image.';
+ window.__cam=window.__cam||{};window.__cam[k+c]=Array.from(cam);
 }
 function finishAll(){
  clearInterval(tmr);const total=performance.now()-t0;setStep(4,'done',ms(performance.now()-run.t4));$('frame').classList.remove('run');
